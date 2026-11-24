@@ -1,0 +1,1243 @@
+/* =========================================================
+   OPTICART — PREMIUM BUSINESS INTELLIGENCE DESIGN SYSTEM
+   Phase 2: visual layer only. Existing chart and data logic
+   remains unchanged until the approved Plotly migration.
+========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+
+:root {
+    --oc-bg: #F5F7FB;
+    --oc-sidebar: #111827;
+    --oc-sidebar-muted: #9CA3AF;
+    --oc-primary: #6366F1;
+    --oc-primary-soft: #EEF2FF;
+    --oc-secondary: #818CF8;
+    --oc-success: #10B981;
+    --oc-warning: #F59E0B;
+    --oc-danger: #EF4444;
+    --oc-card: #FFFFFF;
+    --oc-text: #111827;
+    --oc-muted: #6B7280;
+    --oc-border: #E5E7EB;
+    --oc-shadow: 0 8px 24px rgba(15, 23, 42, .045);
+    --oc-shadow-hover: 0 14px 34px rgba(15, 23, 42, .09);
+    --oc-radius: 16px;
+    --oc-sidebar-width: 252px;
+}
+
+* { box-sizing: border-box; }
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 28px;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 30px 34px 36px calc(var(--oc-sidebar-width) + 34px);
+    background: var(--oc-bg);
+    color: var(--oc-text);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    width: var(--oc-sidebar-width);
+    min-height: 100vh;
+    padding: 27px 17px 20px;
+    background: var(--oc-sidebar);
+    color: #fff;
+    border-right: 1px solid rgba(255,255,255,.05);
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 10px 28px;
+}
+
+.brand-mark {
+    display: grid;
+    place-items: center;
+    flex: 0 0 39px;
+    width: 39px;
+    height: 39px;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #818CF8, #4F46E5);
+    color: #fff;
+    font-family: 'Manrope', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    box-shadow: 0 7px 18px rgba(99,102,241,.28);
+}
+
+.brand-copy h2 {
+    margin: 0;
+    color: #fff;
+    font-family: 'Manrope', sans-serif;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -.55px;
+}
+
+.brand-copy p {
+    margin: 2px 0 0;
+    color: #9CA3AF;
+    font-size: 11px;
+    letter-spacing: .35px;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 13px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-height: 45px;
+    padding: 10px 13px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: #AEB8C8;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.nav-link .nav-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 21px;
+    color: #8F9AAF;
+    font-size: 17px;
+    line-height: 1;
+}
+
+.nav-link:hover {
+    color: #fff;
+    background: rgba(255,255,255,.065);
+    transform: translateX(2px);
+}
+
+.nav-link.active {
+    color: #fff;
+    background: rgba(99,102,241,.19);
+    border-color: rgba(129,140,248,.18);
+    box-shadow: inset 3px 0 0 #818CF8;
+}
+
+.nav-link.active .nav-icon { color: #A5B4FC; }
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 17px 11px 2px;
+    border-top: 1px solid rgba(255,255,255,.09);
+    color: #8F9AAF;
+    font-size: 11px;
+}
+
+.sidebar-footer p { margin: 0; }
+
+.status-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: var(--oc-success);
+    box-shadow: 0 0 0 3px rgba(16,185,129,.13);
+    vertical-align: 1px;
+}
+
+/* Page header */
+.page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+    max-width: 1500px;
+    min-height: 142px;
+    margin: 0 auto 27px;
+    padding: 28px 31px;
+    border: 1px solid rgba(99,102,241,.12);
+    border-radius: 19px;
+    background:
+        radial-gradient(circle at 92% 4%, rgba(129,140,248,.17), transparent 30%),
+        linear-gradient(115deg, #FFFFFF 0%, #F7F8FF 100%);
+    box-shadow: var(--oc-shadow);
+    color: var(--oc-text);
+}
+
+.header-copy { min-width: 0; }
+
+.eyebrow {
+    display: inline-block;
+    margin-bottom: 9px;
+    color: var(--oc-primary);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.35px;
+}
+
+.page-header h1 {
+    margin: 0 0 7px;
+    color: #111827;
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(23px, 2.3vw, 31px);
+    font-weight: 800;
+    letter-spacing: -1.15px;
+    line-height: 1.2;
+}
+
+.page-header h2 {
+    margin: 0 0 7px;
+    color: var(--oc-muted);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.page-header p {
+    margin: 0;
+    color: var(--oc-muted);
+    font-size: 13px;
+}
+
+.header-meta { flex: 0 0 auto; }
+
+.live-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border: 1px solid #DDEFE7;
+    border-radius: 999px;
+    background: #F2FBF6;
+    color: #237A52;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* Main content and KPI cards */
+main,
+.dashboard,
+.page-header,
+footer {
+    max-width: 1500px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    width: 100%;
+    margin-bottom: 23px;
+}
+
+.card,
+.kpi-card {
+    position: relative;
+    min-width: 0;
+    padding: 21px 22px 20px;
+    overflow: hidden;
+    border: 1px solid var(--oc-border);
+    border-radius: var(--oc-radius);
+    background: var(--oc-card);
+    box-shadow: var(--oc-shadow);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.card:hover,
+.kpi-card:hover {
+    transform: translateY(-3px);
+    border-color: #D9DDFB;
+    box-shadow: var(--oc-shadow-hover);
+}
+
+.kpi-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 34px;
+    margin-bottom: 14px;
+}
+
+.kpi-icon {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.revenue-icon { background: #EEF2FF; color: #6366F1; }
+.orders-icon { background: #EAF5FF; color: #2784C7; }
+.units-icon { background: #E9FAF3; color: #0D9B6A; }
+.aov-icon { background: #FFF5E8; color: #D88719; }
+
+.card h3,
+.kpi-card h3 {
+    margin: 0;
+    color: #697386;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .05px;
+}
+
+.card .value {
+    margin: 0 0 7px;
+    color: #111827;
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(22px, 2vw, 29px);
+    font-weight: 800;
+    letter-spacing: -.8px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+}
+
+.card > span {
+    color: #9AA3B2;
+    font-size: 11px;
+}
+
+.sales-page .dashboard { display: block; }
+
+.sales-page .kpi-container {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    width: 100%;
+    margin: 0 0 24px;
+}
+
+.sales-page .kpi-card h3 { margin: 0; }
+
+.sales-page .kpi-card p {
+    margin: 0;
+    color: #111827;
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(21px, 1.8vw, 27px);
+    font-weight: 800;
+    letter-spacing: -.7px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Content panels and chart areas */
+.panel {
+    width: 100%;
+    min-width: 0;
+    margin: 0 auto 20px;
+    padding: 23px 24px 25px;
+    border: 1px solid var(--oc-border);
+    border-radius: var(--oc-radius);
+    background: var(--oc-card);
+    box-shadow: var(--oc-shadow);
+}
+
+.panel h2,
+.panel h3 {
+    margin: 0 0 6px;
+    color: #1F2937;
+    font-family: 'Manrope', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -.25px;
+}
+
+.panel > p {
+    margin: 0 0 15px;
+    color: #8A94A5;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 360px;
+    margin-top: 18px;
+}
+
+.panel canvas {
+    max-width: 100%;
+}
+
+/* Sales page */
+.sales-page .page-header { margin-bottom: 23px; }
+
+.sales-page .panel { margin-top: 0; }
+
+.sales-page .chart-container {
+    height: 370px;
+    margin-top: 18px;
+}
+
+.sales-page .sales-filter { margin-bottom: 18px; }
+
+.sales-filter h2 { margin-bottom: 3px; }
+
+.date-filter-form {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 17px;
+}
+
+.filter-group {
+    display: flex;
+    flex: 1 1 155px;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 130px;
+}
+
+.filter-group label {
+    color: #596579;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.filter-group input,
+.filter-group select {
+    width: 100%;
+    min-height: 42px;
+    padding: 9px 12px;
+    border: 1px solid #DDE2EA;
+    border-radius: 9px;
+    outline: none;
+    background: #fff;
+    color: #273244;
+    font: inherit;
+    font-size: 12px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    border-color: var(--oc-primary);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.12);
+}
+
+.filter-btn,
+.reset-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 17px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.filter-btn {
+    background: var(--oc-primary);
+    color: #fff;
+    box-shadow: 0 5px 12px rgba(99,102,241,.18);
+}
+
+.filter-btn:hover {
+    transform: translateY(-1px);
+    background: #5558E8;
+    box-shadow: 0 8px 16px rgba(99,102,241,.24);
+}
+
+.reset-filter-btn {
+    border-color: #E1E5ED;
+    background: #F8FAFC;
+    color: #596579;
+}
+
+.reset-filter-btn:hover { background: #EEF2F7; }
+
+.sales-period-info {
+    margin: 0 0 18px;
+    padding: 15px 19px;
+    border: 1px solid #DDE4FF;
+    border-radius: 12px;
+    background: #F3F5FF;
+}
+
+.sales-period-info h3 {
+    margin: 0 0 4px;
+    color: #303A72;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.sales-period-info p {
+    margin: 0;
+    color: #69739A;
+    font-size: 12px;
+}
+
+/* Existing overview chart wrappers */
+#sales-monthly-trend,
+#product-analytics,
+#regional-analytics,
+#customer-analytics {
+    scroll-margin-top: 25px;
+}
+
+.chart-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 160px;
+    margin-top: 18px;
+    border: 1px dashed #D7DDE8;
+    border-radius: 12px;
+    background: #FAFBFE;
+    color: #98A1B2;
+    font-size: 13px;
+}
+
+.modules {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.module {
+    padding: 17px;
+    border: 1px solid #E8EBF2;
+    border-radius: 12px;
+    background: #FAFBFE;
+}
+
+.module h4 {
+    margin: 0 0 8px;
+    color: #454E83;
+    font-size: 13px;
+}
+
+.module p {
+    margin: 0;
+    color: #7B8495;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* Import preview */
+.import-page { padding-top: 30px; }
+
+.import-container {
+    width: 100%;
+    max-width: 1500px;
+}
+
+.import-container > p {
+    margin: -12px 0 20px;
+    color: var(--oc-muted);
+}
+
+.import-container > section {
+    margin-bottom: 18px;
+    padding: 22px 24px;
+    border: 1px solid var(--oc-border);
+    border-radius: var(--oc-radius);
+    background: #fff;
+    box-shadow: var(--oc-shadow);
+}
+
+.import-container > section h2 {
+    margin: 0 0 14px;
+    color: #1F2937;
+    font-family: 'Manrope', sans-serif;
+    font-size: 16px;
+}
+
+.import-container table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.import-container th,
+.import-container td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #EDF0F5;
+    text-align: left;
+}
+
+.import-container th {
+    background: #F8FAFC;
+    color: #667085;
+    font-weight: 700;
+}
+
+.import-container a:not(.nav-link) {
+    color: var(--oc-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.import-container a:not(.nav-link):hover { text-decoration: underline; }
+
+.import-container .page-header { margin-bottom: 22px; }
+
+/* Footer */
+footer {
+    padding: 17px 0;
+    color: #9AA3B2;
+    font-size: 11px;
+    text-align: center;
+}
+
+/* Responsive layouts */
+@media (max-width: 1180px) {
+    body { padding-right: 24px; }
+    .dashboard,
+    .sales-page .kpi-container { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .modules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+    :root { --oc-sidebar-width: 0px; }
+
+    body,
+    body.sales-page,
+    body.import-page {
+        padding: 14px 14px 28px;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        min-height: 0;
+        padding: 13px 13px 10px;
+        border-radius: 15px;
+    }
+
+    .sidebar-brand { padding: 1px 5px 12px; }
+    .brand-mark { width: 35px; height: 35px; flex-basis: 35px; }
+    .brand-copy h2 { font-size: 17px; }
+
+    .sidebar-nav {
+        flex-direction: row;
+        gap: 5px;
+        margin: 0;
+        padding: 5px 0 3px;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
+    .nav-link {
+        flex: 0 0 auto;
+        min-height: 38px;
+        padding: 8px 10px;
+        white-space: nowrap;
+        font-size: 11px;
+    }
+
+    .nav-link .nav-icon { width: 16px; font-size: 14px; }
+    .nav-link:hover { transform: none; }
+    .sidebar-footer { display: none; }
+
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 13px;
+        min-height: 0;
+        margin: 15px auto 17px;
+        padding: 21px 20px;
+        border-radius: 15px;
+    }
+
+    .page-header h1 { font-size: 24px; letter-spacing: -.7px; }
+    .header-meta { align-self: flex-start; }
+
+    .dashboard,
+    .sales-page .kpi-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 11px;
+        margin-bottom: 16px;
+    }
+
+    .card,
+    .kpi-card {
+        padding: 15px 14px;
+        border-radius: 13px;
+    }
+
+    .kpi-heading { gap: 8px; margin-bottom: 10px; }
+    .kpi-icon { width: 29px; height: 29px; flex-basis: 29px; font-size: 14px; }
+    .card h3, .kpi-card h3 { font-size: 10px; }
+    .card .value { font-size: 20px; }
+    .sales-page .kpi-card p { font-size: 19px; }
+    .card > span { font-size: 10px; }
+
+    .panel {
+        margin-bottom: 14px;
+        padding: 18px 16px;
+        border-radius: 14px;
+    }
+
+    .panel h2, .panel h3 { font-size: 14px; }
+    .chart-container,
+    .sales-page .chart-container { height: 290px; }
+
+    .date-filter-form { gap: 11px; }
+    .filter-group { flex: 1 1 calc(50% - 8px); }
+    .filter-btn, .reset-filter-btn { flex: 1 1 calc(50% - 8px); }
+
+    .import-container > section { padding: 17px 15px; overflow-x: auto; }
+    .modules { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 420px) {
+    .dashboard,
+    .sales-page .kpi-container { grid-template-columns: 1fr 1fr; }
+    .card .value { font-size: 18px; }
+    .sales-page .kpi-card p { font-size: 17px; }
+    .chart-container,
+    .sales-page .chart-container { height: 255px; }
+    .filter-group { flex-basis: 100%; }
+    .filter-btn, .reset-filter-btn { flex-basis: calc(50% - 8px); }
+}
+
+/* Avoid chart and table content forcing horizontal page overflow */
+main, section, .panel, .chart-container { min-width: 0; }
+img, canvas, svg { max-width: 100%; }
+
+
+
+/* =====================================================
+   PHASE 4 — DASHBOARD INSIGHTS AND USABILITY
+===================================================== */
+
+.insight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.insight-grid > div {
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 12px;
+    background: rgba(148, 163, 184, .045);
+}
+
+.insight-grid span {
+    display: block;
+    margin-bottom: 9px;
+    color: #64748B;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.insight-grid strong {
+    display: block;
+    color: #172033;
+    font-size: 19px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+/* Improve previous-period comparison readability */
+.period-comparison-panel p {
+    color: #64748B;
+}
+
+.period-comparison-panel strong {
+    color: #172033;
+}
+
+.date-filter-form input:focus-visible,
+.date-filter-form select:focus-visible,
+.date-filter-form button:focus-visible,
+.date-filter-form a:focus-visible {
+    outline: 2px solid #14B8A6;
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .insight-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =====================================================
+   OPTICART — CHART READABILITY AND KPI FIXES
+===================================================== */
+
+/* Prevent KPI numbers from breaking into multiple lines */
+.card .value,
+.sales-page .kpi-card p {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+    font-size: clamp(17px, 1.55vw, 24px);
+    letter-spacing: -0.7px;
+    line-height: 1.35;
+}
+
+/* Keep KPI cards properly aligned */
+.dashboard,
+.sales-page .kpi-container {
+    align-items: stretch;
+}
+
+.card,
+.kpi-card {
+    min-width: 0;
+}
+
+/* Chart panels */
+.panel {
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Common chart container */
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 360px;
+    min-width: 0;
+    min-height: 300px;
+    margin-top: 18px;
+}
+
+/* Larger monthly and product charts */
+.chart-container-large {
+    height: 390px;
+    min-height: 390px;
+    margin-top: 20px;
+}
+
+.chart-container-large .plotly-graph-div {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Regional chart — allow taller charts */
+.chart-container-regional {
+    height: auto;
+    min-height: 450px;
+}
+
+/* Compact charts.
+   360px accommodates the Sales Channel and Store Type
+   Plotly figures without clipping. */
+.chart-container-small {
+    height: 360px;
+    min-height: 360px;
+}
+
+/* Ensure chart dimensions apply on Sales Analytics page */
+.sales-page .chart-container {
+    height: 360px;
+}
+
+.sales-page .chart-container-large {
+    height: 390px;
+    min-height: 390px;
+}
+
+.sales-page .chart-container-small {
+    height: 360px;
+    min-height: 360px;
+}
+
+/* Plotly chart fills its available width */
+.chart-container .plotly-graph-div {
+    width: 100% !important;
+    max-width: 100%;
+}
+
+/* Chart headings */
+.panel h2,
+.panel h3 {
+    color: #172033;
+}
+
+/* Chart descriptions */
+.panel > p {
+    color: #64748B;
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+/* Responsive KPI sizing */
+@media (max-width: 1180px) {
+    .card .value,
+    .sales-page .kpi-card p {
+        font-size: clamp(17px, 2vw, 23px);
+    }
+}
+
+/* Tablet and mobile */
+@media (max-width: 760px) {
+    .card .value,
+    .sales-page .kpi-card p {
+        font-size: 17px;
+    }
+
+    .chart-container {
+        height: 290px;
+        min-height: 290px;
+    }
+
+    .chart-container-large,
+    .sales-page .chart-container-large {
+        height: 390px;
+        min-height: 390px;
+    }
+
+    .chart-container-small,
+    .sales-page .chart-container-small {
+        height: 360px;
+        min-height: 360px;
+    }
+
+    .chart-container-regional {
+        min-height: 450px;
+    }
+}
+
+
+/* =========================================================
+   VISIONTRACK — LARGE FONT READABILITY UPDATE
+   Applied as a final override to preserve existing styling,
+   layout, responsive behaviour, and page functionality.
+========================================================= */
+
+html {
+    font-size: 16px;
+}
+
+body,
+body.sales-page,
+body.import-page {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* Sidebar and branding */
+.brand-copy h2 { font-size: 21px; }
+.brand-copy p { font-size: 13px; }
+.nav-link { font-size: 15px; }
+.nav-link .nav-icon { font-size: 17px; }
+.sidebar-footer p { font-size: 13px; }
+
+/* Main page headers */
+.page-header h1 {
+    font-size: clamp(28px, 2.4vw, 34px);
+    line-height: 1.2;
+}
+.page-header p { font-size: 17px; line-height: 1.65; }
+.eyebrow { font-size: 13px; }
+.live-indicator { font-size: 14px; }
+
+/* KPI cards */
+.card h3,
+.kpi-card h3 {
+    font-size: 15px;
+    line-height: 1.4;
+}
+.card .value {
+    font-size: clamp(23px, 2vw, 30px);
+    line-height: 1.3;
+}
+.sales-page .kpi-card p {
+    font-size: clamp(23px, 2vw, 30px);
+    line-height: 1.3;
+}
+.card > span,
+.kpi-card > span {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Chart and content panel headings/descriptions */
+.panel h1,
+.panel h2,
+.panel h3 {
+    font-size: 22px;
+    line-height: 1.4;
+}
+.panel > p {
+    font-size: 17px;
+    line-height: 1.65;
+}
+
+/* Sales filters */
+.filter-group label {
+    font-size: 15px;
+}
+.filter-group input,
+.filter-group select {
+    min-height: 46px;
+    font-size: 16px;
+}
+.filter-btn,
+.reset-filter-btn {
+    min-height: 46px;
+    font-size: 15px;
+}
+.sales-period-info h3 { font-size: 17px; }
+.sales-period-info p { font-size: 15px; }
+
+/* Overview insight cards and module descriptions */
+.insight-grid span { font-size: 15px; }
+.insight-grid strong { font-size: 21px; }
+.module h4 { font-size: 16px; }
+.module p { font-size: 15px; }
+.chart-placeholder { font-size: 15px; }
+
+/* Import preview page and tables */
+.import-container,
+.import-container > p,
+.import-container > section p,
+.import-container li {
+    font-size: 16px;
+    line-height: 1.6;
+}
+.import-container > section h2 { font-size: 21px; }
+.import-container h3 { font-size: 18px; }
+.import-container table { font-size: 14px; }
+.import-container th,
+.import-container td {
+    padding: 12px 14px;
+}
+.import-container th { font-size: 14px; }
+footer { font-size: 13px; }
+
+/* Responsive large typography: retain readability on tablets/phones */
+@media (max-width: 1180px) {
+    .page-header h1 { font-size: 30px; }
+    .card .value,
+    .sales-page .kpi-card p {
+        font-size: clamp(22px, 2.5vw, 28px);
+    }
+}
+
+@media (max-width: 760px) {
+    body,
+    body.sales-page,
+    body.import-page {
+        font-size: 15px;
+    }
+
+    .brand-copy h2 { font-size: 19px; }
+    .brand-copy p { font-size: 13px; }
+    .nav-link { font-size: 13px; }
+    .nav-link .nav-icon { font-size: 15px; }
+
+    .page-header h1 { font-size: 27px; }
+    .page-header p { font-size: 16px; }
+    .eyebrow { font-size: 12px; }
+
+    .card h3,
+    .kpi-card h3 { font-size: 13px; }
+    .card .value,
+    .sales-page .kpi-card p { font-size: 21px; }
+    .card > span,
+    .kpi-card > span { font-size: 13px; }
+
+    .panel h1,
+    .panel h2,
+    .panel h3 { font-size: 20px; }
+    .panel > p { font-size: 15px; }
+
+    .filter-group label { font-size: 14px; }
+    .filter-group input,
+    .filter-group select { font-size: 15px; }
+    .filter-btn,
+    .reset-filter-btn { font-size: 14px; }
+
+    .import-container,
+    .import-container > p,
+    .import-container > section p,
+    .import-container li { font-size: 14px; }
+    .import-container > section h2 { font-size: 19px; }
+    .import-container table { font-size: 13px; }
+}
+
+@media (max-width: 420px) {
+    .page-header h1 { font-size: 25px; }
+    .panel h1,
+    .panel h2,
+    .panel h3 { font-size: 19px; }
+    .panel > p { font-size: 14px; }
+    .card .value,
+    .sales-page .kpi-card p { font-size: 19px; }
+}
+
+
+/* ==========================================
+   DEMOGRAPHICS — FULL WIDTH CHART FIX
+========================================== */
+
+#customer-analytics {
+    width: 100%;
+}
+
+#customer-analytics .modules {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 20px;
+    width: 100% !important;
+    max-width: 100%;
+}
+
+#customer-analytics .module {
+    width: 100% !important;
+    min-width: 0;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+#customer-analytics .module .chart-container,
+#customer-analytics .module .chart-container-small {
+    width: 100% !important;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#customer-analytics .module .plotly-graph-div {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Mobile layout */
+@media (max-width: 760px) {
+    #customer-analytics .modules {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+
+
+/* ==========================================
+   PRODUCT ANALYTICS — FULL CHART VISIBILITY
+========================================== */
+
+#product-analytics {
+    height: auto !important;
+    min-height: 950px;
+    overflow: visible !important;
+}
+
+#product-analytics .chart-container-large {
+    width: 100% !important;
+    height: 950px !important;
+    min-height: 950px !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+#product-analytics .chart-container-large .plotly-graph-div {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+}
+
+@media (max-width: 760px) {
+    #product-analytics {
+        min-height: 850px;
+    }
+
+    #product-analytics .chart-container-large {
+        height: 850px !important;
+        min-height: 850px !important;
+    }
+}
+
+
+/* Product and Monthly chart containers */
+.chart-container-large {
+    width: 100%;
+    min-width: 0;
+    height: auto !important;
+    min-height: 620px;
+    overflow: visible !important;
+}
+
+.chart-container-large .plotly-graph-div {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* ==========================================
+   MONTHLY SALES TREND — HEIGHT ADJUSTMENT
+========================================== */
+
+#monthly-sales .chart-container-large {
+    height: 380px !important;
+    min-height: 380px !important;
+    max-height: 380px !important;
+    overflow: hidden;
+}
+
+#monthly-sales .chart-container-large .plotly-graph-div {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
+/* =====================================================
+   OPTICART - PRODUCT ANALYTICS COMPACT LAYOUT
+   ===================================================== */
+
+#product-analytics {
+    height: auto !important;
+    min-height: 0 !important;
+    padding-bottom: 20px !important;
+}
+
+#product-analytics .chart-container-large {
+    height: 460px !important;
+    min-height: 0 !important;
+    max-height: 460px !important;
+    overflow: hidden;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+#product-analytics .js-plotly-plot,
+#product-analytics .plot-container,
+#product-analytics .svg-container {
+    max-height: 460px !important;
+}
+
+#product-analytics .panel,
+#product-analytics .chart-wrapper {
+    min-height: 0 !important;
+}

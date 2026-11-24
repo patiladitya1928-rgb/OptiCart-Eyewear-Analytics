@@ -1,0 +1,9 @@
+{
+    "csv_file": "Lenskart_India_processed.csv",
+    "csv_sha256": "31326c91c86accbdaca62a7672e3e168d39be865db1a522d7476fc6dfc2f5ebd",
+    "preview_file": "preview_20261029_091853.csv",
+    "preview_sha256": "5d71ee92d846e8c5f4fbe47a20537d91681e4d927bcac28668b312131190145c",
+    "total_rows": 150000,
+    "valid_candidates": 150000,
+    "created_at_utc": "2026-11-21T16:51:30.634215+00:00"
+}

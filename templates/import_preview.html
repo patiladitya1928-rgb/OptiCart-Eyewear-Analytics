@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiCart | Import Preview</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body class="import-page">
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-mark" aria-hidden="true">O</div>
+            <div class="brand-copy"><h2>OptiCart</h2><p>Business Intelligence</p></div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('dashboard.home') }}" class="nav-link"><span class="nav-icon">⌂</span>Overview</a>
+            <a href="{{ url_for('sales.sales_analytics') }}" class="nav-link"><span class="nav-icon">↗</span>Sales Analytics</a>
+            <a href="{{ url_for('imports.import_preview') }}" class="nav-link active"><span class="nav-icon">⇧</span>Import Preview</a>
+        </nav>
+        <div class="sidebar-footer"><p><span class="status-dot"></span> Analytics workspace</p></div>
+    </aside>
+    <main class="container import-container">
+        <header class="page-header">
+            <div class="header-copy"><span class="eyebrow">DATA MANAGEMENT</span>
+            <h1>Import preview</h1>
+            <p>Review dataset validation and database comparison results.</p></div>
+        </header>
+
+        
+
+        <p>
+            Review your sales dataset before importing records into MySQL.
+        </p>
+
+        {% if report_found %}
+
+            <!-- Dataset Information -->
+            <section>
+                <h2>Dataset</h2>
+
+                <p>File: Lenskart_India_processed.csv</p>
+
+                <p>
+                    Rows inspected:
+                    {{ "{:,}".format(summary.total) }}
+                </p>
+
+                <p>Status: Preview only — no records imported</p>
+            </section>
+
+
+            <!-- Validation Summary -->
+            <section>
+                <h2>Validation Summary</h2>
+
+                <p>
+                    Valid candidates:
+                    {{ "{:,}".format(summary.valid) }}
+                </p>
+
+                <p>
+                    Rejected rows:
+                    {{ "{:,}".format(summary.rejected) }}
+                </p>
+
+                <p>
+                    Repeated IDs:
+                    {{ "{:,}".format(summary.repeated) }}
+                </p>
+
+                <p>
+                    Needs review:
+                    {{ "{:,}".format(summary.needs_review) }}
+                </p>
+            </section>
+
+
+            <!-- Database Comparison -->
+            <section>
+                <h2>Database Comparison</h2>
+
+                {% if comparison.comparison_failed %}
+
+                    <p style="color: red;">
+                        <strong>Comparison Failed!</strong>
+                        {{ comparison.error_message }}
+                    </p>
+
+                {% else %}
+
+                    <p style="color: green;">
+                        <strong>
+                            Comparison completed successfully.
+                        </strong>
+                    </p>
+
+                {% endif %}
+
+                <p>
+                    Existing MySQL records:
+                    {{ "{:,}".format(comparison.existing_rows) }}
+                </p>
+
+                <p>
+                    CSV rows compared:
+                    {{ "{:,}".format(comparison.compared_rows) }}
+                </p>
+
+                <p>
+                    New records:
+                    {{ "{:,}".format(comparison.new_records) }}
+                </p>
+
+                <p>
+                    Exact existing duplicates:
+                    {{ "{:,}".format(comparison.exact_duplicates) }}
+                </p>
+
+                <p>
+                    Data conflicts:
+                    {{ "{:,}".format(comparison.data_conflicts) }}
+                </p>
+
+                <p>
+                    Repeated IDs excluded from comparison:
+                    {{ "{:,}".format(comparison.repeated_id_count) }}
+                </p>
+
+                {% if comparison.repeated_ids %}
+
+                    <h3>Repeated Order IDs</h3>
+
+                    <p>
+                        These IDs were excluded from database comparison:
+                    </p>
+
+                    <ul>
+                        {% for order_id in comparison.repeated_ids %}
+                            <li>{{ order_id }}</li>
+                        {% endfor %}
+                    </ul>
+
+                {% else %}
+
+                    <p>No repeated order IDs were found in the comparison.</p>
+
+                {% endif %}
+
+            </section>
+
+
+            <!-- Sales Records Preview -->
+            <section>
+                <h2>Sales Records Preview</h2>
+
+                <p>
+                    Showing records
+                    {{ (page - 1) * 10 + 1 if total_records > 0 else 0 }}
+                    –
+                    {{ [page * 10, total_records] | min }}
+                    of {{ "{:,}".format(total_records) }} records.
+                </p>
+
+                {% if preview_records %}
+
+                    <div style="overflow-x: auto;">
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Order Date</th>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th>Product Category</th>
+                                    <th>Quantity</th>
+                                    <th>Net Sales Amount (₹)</th>
+                                    <th>Validation Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for record in preview_records %}
+
+                                    <tr>
+                                        <td>
+                                            {{ record["order_id"] }}
+                                        </td>
+
+                                        <td>
+                                            {{ record["order_date"] }}
+                                        </td>
+
+                                        <td>
+                                            {{ record["city"] }}
+                                        </td>
+
+                                        <td>
+                                            {{ record["state"] }}
+                                        </td>
+
+                                        <td>
+                                            {{ record["product_category"] }}
+                                        </td>
+
+                                        <td>
+                                            {{ record["quantity"] }}
+                                        </td>
+
+                                        <td>
+                                            {{ "{:,.2f}".format(
+                                                record["net_sales_amount"] | float
+                                            ) }}
+                                        </td>
+
+                                        <td>
+                                            {{ record["preview_status"] }}
+                                        </td>
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+
+                    <!-- Pagination -->
+                    <nav class="pagination">
+
+                        {% if page > 1 %}
+
+                            <a href="{{ url_for(
+                                'imports.import_preview',
+                                page=page - 1
+                            ) }}">
+                                Previous
+                            </a>
+
+                        {% else %}
+
+                            <span>Previous</span>
+
+                        {% endif %}
+
+
+                        <span>
+                            Page {{ page }} of
+                            {{ "{:,}".format(total_pages) }}
+                        </span>
+
+
+                        <form action="{{ url_for('imports.import_preview') }}"
+                              method="get">
+
+                            <label for="page-number">
+                                Go to page:
+                            </label>
+
+                            <input
+                                type="number"
+                                id="page-number"
+                                name="page"
+                                min="1"
+                                max="{{ total_pages }}"
+                                value="{{ page }}"
+                                required
+                            >
+
+                            <button type="submit">
+                                Go
+                            </button>
+
+                        </form>
+
+
+                        {% if page < total_pages %}
+
+                            <a href="{{ url_for(
+                                'imports.import_preview',
+                                page=page + 1
+                            ) }}">
+                                Next
+                            </a>
+
+                        {% else %}
+
+                            <span>Next</span>
+
+                        {% endif %}
+
+                    </nav>
+
+                {% else %}
+
+                    <p>No preview records are available.</p>
+
+                {% endif %}
+
+            </section>
+
+
+            <p>
+                Validation counts come from the latest summary CSV
+                in the reports folder.
+            </p>
+
+
+        {% else %}
+
+            <section>
+                <h2>No Preview Report Found</h2>
+
+                <p>
+                    Run the CSV validation script to generate a summary report.
+                </p>
+            </section>
+
+        {% endif %}
+
+
+        <a href="{{ url_for('dashboard.home') }}">
+            Back to Dashboard
+        </a>
+
+    </main>
+</body>
+</html>

@@ -1,0 +1,322 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>OptiCart | Overview Dashboard</title>
+
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Plotly.js: shared renderer for all dashboard visualizations -->
+    <script src="https://cdn.plot.ly/plotly-3.1.0.min.js"></script>
+</head>
+
+<body>
+
+    <!-- ================= SIDEBAR NAVIGATION ================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="brand-mark" aria-hidden="true">O</div>
+            <div class="brand-copy"><h2>OptiCart</h2>
+            <p>Business Intelligence</p></div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="#overview" class="nav-link active">
+                <span class="nav-icon">⌂</span>
+                Overview
+            </a>
+
+            <a href="#monthly-sales" class="nav-link">
+                <span class="nav-icon">↗</span>
+                Sales Trend
+            </a>
+
+            <a href="#product-analytics" class="nav-link">
+                <span class="nav-icon">◈</span>
+                Product Analytics
+            </a>
+
+            <a href="#regional-analytics" class="nav-link">
+                <span class="nav-icon">⌖</span>
+                Regional Analytics
+            </a>
+
+            <a href="#customer-analytics" class="nav-link">
+                <span class="nav-icon">♙</span>
+                Sales-record Demographics
+            </a>
+
+            <a href="/sales" class="nav-link">
+                <span class="nav-icon">▤</span>
+                Sales Analytics
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <p><span class="status-dot"></span> Analytics workspace</p>
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN DASHBOARD HEADER ================= -->
+
+    <header class="page-header" id="overview">
+
+        <div>
+            <div class="header-copy"><span class="eyebrow">BUSINESS OVERVIEW</span>
+            <h1>Good business starts with clarity.</h1>
+            <p>Monitor eyewear sales, revenue and order-record trends in one place.</p></div>
+            <div class="header-meta"><span class="live-indicator"><span class="status-dot"></span> Live data overview</span></div>
+        </div>
+
+    </header>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main>
+
+        <!-- ================= KPI CARDS ================= -->
+
+        <div class="dashboard">
+
+            <!-- Total Net Sales -->
+            <section class="card">
+
+                <div class="kpi-heading"><span class="kpi-icon revenue-icon">₹</span><h3>Total Net Sales</h3></div>
+
+                <p class="value">
+                    ₹{{ "{:,.2f}".format(kpis.total_net_sales) }}
+                </p>
+
+                <span>Revenue after discounts</span>
+
+            </section>
+
+
+            <!-- Total Orders -->
+            <section class="card">
+
+                <div class="kpi-heading"><span class="kpi-icon orders-icon">▤</span><h3>Total Orders</h3></div>
+
+                <p class="value">
+                    {{ "{:,}".format(kpis.total_orders) }}
+                </p>
+
+                <span>Total unique orders</span>
+
+            </section>
+
+
+            <!-- Units Sold -->
+            <section class="card">
+
+                <div class="kpi-heading"><span class="kpi-icon units-icon">□</span><h3>Units Sold</h3></div>
+
+                <p class="value">
+                    {{ "{:,}".format(kpis.units_sold) }}
+                </p>
+
+                <span>Total quantity sold</span>
+
+            </section>
+
+
+            <!-- Average Order Value -->
+            <section class="card">
+
+                <div class="kpi-heading"><span class="kpi-icon aov-icon">↗</span><h3>Average Order Value</h3></div>
+
+                <p class="value">
+                    ₹{{ "{:,.2f}".format(kpis.average_order_value) }}
+                </p>
+
+                <span>Average net sales per order</span>
+
+            </section>
+
+        </div>
+
+
+        <!-- ================= MONTHLY SALES TREND ================= -->
+
+        <section class="panel" id="monthly-sales">
+
+            <h2>Monthly Sales Trend</h2>
+
+            <p>
+                View monthly revenue trends to understand
+                business performance over time.
+            </p>
+
+            <div class="chart-container chart-container-large">
+                {{ charts.monthly_sales | safe }}
+            </div>
+
+            {% if not monthly_labels %}
+                <p style="text-align: center; color: #8a96a8;">
+                    No sales data available yet.
+                </p>
+            {% endif %}
+
+        </section>
+
+
+        <!-- ================= PRODUCT ANALYTICS ================= -->
+
+        <section class="panel" id="product-analytics">
+
+            <h3>Product Analytics</h3>
+
+            <p>
+                Compare revenue generated by different eyewear categories.
+            </p>
+
+            <div class="chart-container chart-container-large">
+                {{ charts.product_sales | safe }}
+            </div>
+
+            {% if not product_labels %}
+                <p style="text-align: center; color: #8a96a8;">
+                    No product sales data available.
+                </p>
+            {% endif %}
+
+        </section>
+
+
+        <!-- ================= REGIONAL ANALYTICS ================= -->
+
+        <section class="panel" id="regional-analytics">
+
+            <h3>Regional Analytics</h3>
+
+            <p>
+                Compare sales revenue across different states in India.
+            </p>
+
+            <div class="chart-container chart-container-regional">
+                    {{ charts.regional_sales | safe }}
+            </div>
+
+            {% if not regional_labels %}
+                <p style="text-align: center; color: #8a96a8;">
+                    No regional sales data available.
+                </p>
+            {% endif %}
+
+        </section>
+
+
+        <!-- ================= CUSTOMER ANALYTICS ================= -->
+
+        <section class="panel" id="customer-analytics">
+
+            <h3>Sales-record Demographics</h3>
+
+            <p>
+                These charts count sales records by gender and age group; they do not represent unique customers.
+            </p>
+
+            <div class="modules">
+
+                <!-- Gender Distribution -->
+                <div class="module">
+
+                    <h4>Sales-record Gender Distribution</h4>
+
+                    <div class="chart-container chart-container-small">
+                        {{ charts.gender | safe }}
+                    </div>
+
+                    {% if not gender_labels %}
+                        <p>No sales-record gender data available.</p>
+                    {% endif %}
+
+                </div>
+
+
+                <!-- Age Group Distribution -->
+                <div class="module">
+
+                    <h4>Sales-record Age Group Distribution</h4>
+
+                    <div class="chart-container chart-container-small">
+                        {{ charts.age | safe }}
+                    </div>
+
+                    {% if not age_labels %}
+                        <p>No sales-record age data available.</p>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+        OptiCart | Eyewear Sales and Business Analytics System
+    </footer>
+
+
+<script>
+    const navLinks = document.querySelectorAll(".nav-link");
+
+    const sections = document.querySelectorAll(
+        "#overview, #monthly-sales, #product-analytics, #regional-analytics, #customer-analytics"
+    );
+
+    // Highlight the clicked navigation link
+    navLinks.forEach(link => {
+        link.addEventListener("click", function () {
+            navLinks.forEach(item => item.classList.remove("active"));
+            this.classList.add("active");
+        });
+    });
+
+    // Automatically highlight the section visible on screen
+    const observer = new IntersectionObserver(
+        entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const sectionId = entry.target.id;
+
+                    navLinks.forEach(link => {
+                        link.classList.toggle(
+                            "active",
+                            link.getAttribute("href") === `#${sectionId}`
+                        );
+                    });
+                }
+            });
+        },
+        {
+            threshold: 0.3
+        }
+    );
+
+    sections.forEach(section => observer.observe(section));
+</script>
+
+
+</body>
+
+</html>

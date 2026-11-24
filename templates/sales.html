@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>OptiCart | Sales Analytics</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Plotly.js: shared renderer for all dashboard visualizations -->
+    <script src="https://cdn.plot.ly/plotly-3.1.0.min.js"></script>
+</head>
+
+<body class="sales-page">
+
+    <!-- =================================
+         SIDEBAR NAVIGATION
+    ================================== -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="brand-mark" aria-hidden="true">O</div>
+            <div class="brand-copy"><h2>OptiCart</h2>
+            <p>Business Intelligence</p></div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="/" class="nav-link">
+                <span class="nav-icon">⌂</span>
+                Overview
+            </a>
+
+            <a href="/#monthly-sales" class="nav-link">
+                <span class="nav-icon">↗</span>
+                Sales Trend
+            </a>
+
+            <a href="/#product-analytics" class="nav-link">
+                <span class="nav-icon">◈</span>
+                Product Analytics
+            </a>
+
+            <a href="/#regional-analytics" class="nav-link">
+                <span class="nav-icon">⌖</span>
+                Regional Analytics
+            </a>
+
+            <a href="/#customer-analytics" class="nav-link">
+                <span class="nav-icon">♙</span>
+                Customer Analytics
+            </a>
+
+            <a href="/sales" class="nav-link active">
+                <span class="nav-icon">▤</span>
+                Sales Analytics
+            </a>
+
+        </nav>
+
+        <div class="sidebar-footer">
+            <p><span class="status-dot"></span> Analytics workspace</p>
+        </div>
+
+    </aside>
+
+
+    <!-- =================================
+         PAGE HEADER
+    ================================== -->
+
+    <header class="page-header">
+
+        <div class="header-copy"><span class="eyebrow">PERFORMANCE / SALES</span>
+        <h1>Sales analytics</h1>
+        <p>Understand revenue trends, product performance and sales channels.</p></div>
+        <div class="header-meta"><span class="live-indicator"><span class="status-dot"></span> Sales workspace</span></div>
+
+    </header>
+
+
+    <!-- =================================
+         MAIN DASHBOARD
+    ================================== -->
+
+    <main class="dashboard">
+
+        <!-- =================================
+     SALES FILTERS
+================================== -->
+
+<section class="panel sales-filter">
+
+    <h2>Filter Sales</h2>
+
+    <form method="GET"
+          action="{{ url_for('sales.sales_analytics') }}"
+          class="date-filter-form">
+
+        <!-- START DATE -->
+        <div class="filter-group">
+            <label for="start_date">Start Date</label>
+            <input
+                type="date"
+                id="start_date"
+                name="start_date"
+                value="{{ request.args.get('start_date', '') }}"
+            >
+        </div>
+
+        <!-- END DATE -->
+        <div class="filter-group">
+            <label for="end_date">End Date</label>
+            <input
+                type="date"
+                id="end_date"
+                name="end_date"
+                value="{{ request.args.get('end_date', '') }}"
+            >
+        </div>
+
+        <!-- STATE DROPDOWN -->
+        <div class="filter-group">
+            <label for="state">State / Region</label>
+            <select id="state" name="state">
+                <option value="">All States</option>
+                {% for state in state_options %}
+                    <option value="{{ state }}"
+                        {% if state == selected_state %}selected{% endif %}>
+                        {{ state }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- CITY DROPDOWN -->
+        <div class="filter-group">
+            <label for="city">City</label>
+            <select id="city" name="city">
+                <option value="">All Cities</option>
+            </select>
+        </div>
+
+        <button type="submit" class="filter-btn">
+            Apply Filter
+        </button>
+
+        <a href="{{ url_for('sales.sales_analytics') }}"
+           class="reset-filter-btn">
+            Reset
+        </a>
+
+    </form>
+
+</section>
+
+
+        <!-- =================================
+             SALES PERFORMANCE SUMMARY
+        ================================== -->
+
+        <div class="sales-period-info">
+
+            <h3>Sales Performance Overview</h3>
+
+            <p>
+                {% if request.args.get('start_date') or request.args.get('end_date') %}
+                    Date range: <strong>{{ request.args.get('start_date') or 'Earliest available' }}</strong> to
+                    <strong>{{ request.args.get('end_date') or 'Latest available' }}</strong>
+                {% else %}Showing sales for all available dates{% endif %}
+                {% if selected_state %} · State: <strong>{{ selected_state }}</strong>{% endif %}
+                {% if selected_city %} · City: <strong>{{ selected_city }}</strong>{% endif %}
+            </p>
+
+        </div>
+
+
+        <!-- =================================
+             SALES KPI CARDS
+        ================================== -->
+
+        <section class="kpi-container">
+
+            <div class="kpi-card">
+
+                <div class="kpi-heading"><span class="kpi-icon revenue-icon">₹</span><h3>Total Revenue</h3></div>
+
+                <p>
+                    ₹{{ "{:,.2f}".format(kpis.total_revenue) }}
+                </p>
+
+            </div>
+
+            <div class="kpi-card">
+
+                <div class="kpi-heading"><span class="kpi-icon orders-icon">▤</span><h3>Total Orders</h3></div>
+
+                <p>
+                    {{ "{:,}".format(kpis.total_orders) }}
+                </p>
+
+            </div>
+
+            <div class="kpi-card">
+
+                <div class="kpi-heading"><span class="kpi-icon units-icon">□</span><h3>Units Sold</h3></div>
+
+                <p>
+                    {{ "{:,}".format(kpis.units_sold) }}
+                </p>
+
+            </div>
+
+            <div class="kpi-card">
+
+                <div class="kpi-heading"><span class="kpi-icon aov-icon">↗</span><h3>Average Order Value</h3></div>
+
+                <p>
+                    ₹{{ "{:,.2f}".format(kpis.average_order_value) }}
+                </p>
+
+            </div>
+
+        </section>
+
+
+        {% if period_comparison %}
+        <section class="panel period-comparison-panel">
+            <h2>Previous-period comparison</h2>
+            <p>Compared with {{ period_comparison.start }} to {{ period_comparison.end }} (the immediately preceding period of equal length).</p>
+            <div class="insight-grid">
+                <div><span>Revenue change</span><strong>{% if period_comparison.revenue_change is none %}New activity{% else %}{{ "%+.1f"|format(period_comparison.revenue_change) }}%{% endif %}</strong></div>
+                <div><span>Order change</span><strong>{% if period_comparison.orders_change is none %}New activity{% else %}{{ "%+.1f"|format(period_comparison.orders_change) }}%{% endif %}</strong></div>
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="panel sales-insights-panel">
+            <h2>Sales highlights</h2>
+            <div class="insight-grid">
+                <div><span>Top product category</span><strong>{% if top_category %}{{ top_category.label }} · {{ "%.1f"|format(top_category.share) }}% of filtered revenue{% else %}No data{% endif %}</strong></div>
+                <div><span>Top sales channel</span><strong>{% if top_channel %}{{ top_channel.label }} · {{ "%.1f"|format(top_channel.share) }}% of filtered revenue{% else %}No data{% endif %}</strong></div>
+            </div>
+        </section>
+
+        <!-- =================================
+             1. MONTHLY SALES TREND
+        ================================== -->
+
+        <section class="panel" id="sales-monthly-trend">
+
+            <h2>Monthly Sales Trend</h2>
+
+            <p>
+                Track monthly revenue performance over time.
+            </p>
+
+            <div class="chart-container chart-container-large">
+                {{ charts.monthly_sales | safe }}
+            </div>
+
+        </section>
+
+
+        <!-- =================================
+             2. SALES BY PRODUCT CATEGORY
+        ================================== -->
+
+        <section class="panel" id="sales-product-analytics">
+
+            <h2>Product Revenue Comparison</h2>
+
+            <p>
+                Compare product category revenue, rankings and
+                percentage contribution to total revenue.
+            </p>
+
+            <div class="chart-container chart-container-large">
+                {{ charts.product_sales | safe }}
+            </div>
+
+        </section>
+
+
+        <!-- =================================
+             3. SALES BY CHANNEL
+        ================================== -->
+
+        <section class="panel" id="sales-channel-analytics">
+
+            <h2>Sales by Channel</h2>
+
+            <p>
+                Compare revenue generated through different sales channels.
+            </p>
+
+            <div class="chart-container chart-container-small">
+                {{ charts.channel_sales | safe }}
+            </div>
+
+        </section>
+
+
+        <!-- =================================
+             4. SALES BY STORE TYPE
+        ================================== -->
+
+        <section class="panel" id="sales-store-analytics">
+
+            <h2>Sales by Store Type</h2>
+
+            <p>
+                Compare revenue generated by different store types.
+            </p>
+
+            <div class="chart-container chart-container-small">
+                {{ charts.store_sales | safe }}
+            </div>
+
+        </section>
+
+    </main>
+
+
+<!-- =================================
+     DYNAMIC STATE AND CITY DROPDOWNS
+================================== -->
+
+<script>
+    const cityOptionsByState =
+        {{ city_options_by_state | tojson }};
+
+    const selectedState =
+        {{ selected_state | tojson }};
+
+    const selectedCity =
+        {{ selected_city | tojson }};
+
+    const stateDropdown = document.getElementById("state");
+    const cityDropdown = document.getElementById("city");
+
+
+    function loadCities(state, cityToSelect = "") {
+
+        cityDropdown.innerHTML = "";
+
+        const allOption = document.createElement("option");
+        allOption.value = "";
+        allOption.textContent = "All Cities";
+        cityDropdown.appendChild(allOption);
+
+        let cities = [];
+
+        if (state && cityOptionsByState[state]) {
+            cities = cityOptionsByState[state];
+        } else {
+            cities = [
+                ...new Set(
+                    Object.values(cityOptionsByState).flat()
+                )
+            ].sort();
+        }
+
+        cities.forEach(function(city) {
+
+            const option = document.createElement("option");
+            option.value = city;
+            option.textContent = city;
+
+            if (city === cityToSelect) {
+                option.selected = true;
+            }
+
+            cityDropdown.appendChild(option);
+        });
+    }
+
+
+    // Restore selected values after applying filters
+    loadCities(selectedState, selectedCity);
+
+
+    // Update City options whenever State / Region changes
+    stateDropdown.addEventListener("change", function() {
+        loadCities(this.value);
+    });
+</script>
+
+</body>
+</html>
